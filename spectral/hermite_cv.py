@@ -1,3 +1,38 @@
+
+"""
+Hermite-projection / Gauss-Hermite control-variate estimators for
+
+        I(f) = E[f(Z)],   Z ~ N(0, I_s).
+
+Everything is written in the ORTHONORMAL probabilists' basis
+
+        hhat_alpha(z) = prod_i He_{alpha_i}(z_i) / sqrt(alpha_i!),
+        E[hhat_alpha hhat_beta] = delta_{alpha,beta},
+
+so that with  f = sum_alpha b_alpha hhat_alpha  we have
+
+        b_0 = I(f),      Var-relevant quantity  sum_alpha b_alpha^2 = ||f||^2_{L2(gamma)}.
+
+Translation to the dissertation's normalisation:  beta_alpha = b_alpha / sqrt(alpha!),
+and  alpha! * beta_alpha^2 = b_alpha^2.  All variance identities are therefore the
+same statements, just written without the alpha! bookkeeping (and far better
+conditioned numerically -- He_n(z)/sqrt(n!) does not overflow, He_n(z) does).
+
+Estimators implemented
+----------------------
+ plain      IhatM(f)   = (1/K) sum_i [ f(Z_i) - sum_{0<|a|<M} bhat_a hhat_a(Z_i) ]
+ antithetic IhatM^A(f) = (1/K) sum_i [ (f(Z_i)+f(-Z_i))/2
+                                       - sum_{0<|a|<M, |a| even} bhat_a hhat_a(Z_i) ]
+
+with bhat_a from a tensorised m-point Gauss-Hermite rule.
+
+Evaluation budget
+-----------------
+ plain:       n = m^s + K
+ antithetic:  n = m^s + 2K
+"""
+
+
 import numpy as np
 from numpy.polynomial.hermite_e import hermegauss
 
