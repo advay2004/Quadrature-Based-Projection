@@ -1,6 +1,6 @@
 """
 Test integrands for  I(f) = E[f(Z)],  Z ~ N(0, I_s),  together with the two
-wrappers needed to make the Chopin-Gerber (2022) estimators attack the *same*
+wrappers needed to make the Chopin-Gerber (2022) estimators attack the same
 integral on [0,1]^s.
 
 Two routes to a CG baseline
@@ -12,12 +12,11 @@ Two routes to a CG baseline
     Feed g to `cubic_strat.core.estimate` (the non-vanishing estimator (9)).
     This is the cleanest head-to-head: identical integral, and CG's own
     evaluation count n = 3k^s.
-    NOTE: g is generally NOT in C^r([0,1]^s) with bounded derivatives, because
-    Phi^{-1} blows up at the boundary.  That is exactly the point to test.
-
+    g is generally NOT in C^r([0,1]^s) with bounded derivatives, because
+    Phi^{-1} blows up at the boundary.
 (B) CG's own recipe for R^s integrals (their Prop. 1, Section 3.3): write
     I = int_{R^s} G(x) dx with G(x) = f(x) phi(x), and push it to [0,1]^s
-    through the Student-like map psi_s, giving a *vanishing* integrand for
+    through the Student-like map psi_s, giving a vanishing integrand for
     `cubic_strat.core.vanish_estimates`.
 
 Every integrand takes an (N, s) array and returns an (N,) array.
