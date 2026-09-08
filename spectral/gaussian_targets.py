@@ -165,7 +165,7 @@ def vanishing_phi(target, tau=1.5, xmax=40.0):
     return phi_fun
 
 
-# a smoothness ladder: the cleanest way to test the predicted r-dependence
+# a smoothness ladder
 
 def relu_family(s, powers=(1, 2, 3, 4, 5), shift=0.3):
     """f_p(z) = sum_i (z_i - shift)_+^p.
