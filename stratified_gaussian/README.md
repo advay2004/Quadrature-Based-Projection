@@ -21,12 +21,6 @@ obtained coordinatewise by inversion,
 $(X^+_c)_i = \Phi^{-1}\{(j_i - 1 + V_i)/k\}$ with $V_i \sim U(0,1)$, and the
 estimator averages an antithetic pair with even-order control variates subtracted.
 
-**The antithetic partner reflects the uniform, not the point:**
-
-```python
-Xm = norm.ppf((idx + 1.0 - V) / k)      # correct
-Xm = 2.0 * mu - Xp                      # WRONG: biased
-```
 
 Reflecting in $z$ about the conditional mean is what the cube construction does
 about a cell centre, and it works there because a cell is symmetric about its
