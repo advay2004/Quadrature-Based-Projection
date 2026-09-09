@@ -81,7 +81,7 @@ The estimator leads at $s=1$ and $s=2$ on every problem tested, reaching the dou
 precision floor at budgets where the comparison method needs its highest order and
 roughly twice the evaluations. By $s=3$ it loses the lead. The tensor grid costs
 $m^s$ evaluations, so the truncation degree grows only as $n^{1/s}$, and at
-$n = 40{,}000$ with $s=4$ that leaves eleven nodes per axis — too few to exploit the
+$n = 40{,}000$ with $s=4$ that leaves eleven nodes per axis, which are too few to exploit the
 smoothness the integrand has. A sparse grid construction is the direct extension.
 
 On the finite-smoothness ladder the fitted slopes are steeper than the proved bound
