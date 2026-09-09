@@ -67,7 +67,7 @@ against the upstream estimators on the upstream test problems.
 | | |
 |---|---|
 | [`spectral/`](spectral/) | the Hermite spectral estimator |
-| [`stratified/`](stratified/) | the stratified Gaussian estimator |
+| [`stratified_gaussian/`](stratified/) | the stratified Gaussian estimator |
 
 Each folder is self-contained: the estimator, a notebook that reproduces every
 figure and table it is responsible for, the figures themselves, and its own
