@@ -1,146 +1,90 @@
-# Spectral estimators for Gaussian integrals
+# The spectral estimator
 
-Code for an MSc dissertation on unbiased estimation of
+Hermite control variates with coefficients from a tensorised Gauss--Hermite rule.
+Produces Figures 2--5 and Tables 2--7 of the dissertation.
 
-$$I_\phi(f) \;=\; \int_{\mathbb{R}^s} f(x)\,\phi_{\mu,\Sigma}(x)\,dx \;=\; \mathbb{E}_{X\sim N(\mu,\Sigma)}[f(X)],$$
+## The estimator
 
-and its comparison against the cubic-stratification estimators of Chopin and
-Gerber (2022), which are called through the upstream package in the parent
-directory rather than reimplemented here.
+Fix a truncation degree $M$ and a quadrature order $m$. Form the coefficients
 
-Two estimators are provided.
+$$\hat\beta_\alpha = \frac{1}{\alpha!}\sum_{q=1}^{m^s} w_q\, f(\xi_q) H_\alpha(\xi_q)$$
 
-**The stratified estimator** (`stratified.py`) partitions $\mathbb{R}^s$ into
-$k^s$ boxes of equal Gaussian probability using the normal quantiles, and on
-each box averages an antithetic pair with even-order control variates
-subtracted. It is the direct Gaussian analogue of the upstream construction. Its
-rate is capped at $O(n^{-1/2-1/(2s)})$ regardless of the smoothness order,
-because the outermost strata have widths that shrink only at the Mills-ratio
-rate; this is what motivates the second estimator.
+once from the $m^s$ tensorised Gauss--Hermite nodes, then draw
+$Z_1,\dots,Z_K \sim \mathcal{N}(0, I_s)$ independently of them and average
 
-**The spectral estimator** (`hermite_cv.py`) instead expands $f$ in the Hermite
-polynomials orthogonal to the Gaussian measure, approximates the coefficients by
-Gauss–Hermite quadrature, and subtracts the truncated expansion as a control
-variate. It is unbiased for every truncation degree $M$ and every quadrature
-order $m$, and has no order parameter to select.
+$$\hat I^{(A)}_M(f) = \frac{1}{K}\sum_{i=1}^{K}\left\{
+\frac{f(Z_i)+f(-Z_i)}{2} - \sum_{\substack{0<|\alpha|<M \\ |\alpha| \text{ even}}}
+\hat\beta_\alpha H_\alpha(Z_i)\right\}.$$
 
-## Installation
+Since $\mathbb{E}[H_\alpha(Z)] = 0$ for every $|\alpha| > 0$, this is unbiased at
+every $M$ and every $m$ — the coefficients are fixed before the sample is drawn, so
+their error affects the variance and not the expectation. The parity relation
+$H_\alpha(-z) = (-1)^{|\alpha|}H_\alpha(z)$ removes every odd-degree coefficient
+identically, so only even $|\alpha|$ are retained.
 
-```bash
-pip install findiff particles
-pip install -e ..          # the upstream package, from this directory
-```
+The budget is $n = m^s + 2K$, split by a parameter $\theta \in (0,1)$ giving the
+fraction spent on the coefficients:
 
-`findiff` supplies the numerical derivatives used by the upstream estimator;
-`particles` supplies the Pima dataset.
+$$m = \lfloor (\theta n)^{1/s} \rfloor, \qquad M = m, \qquad
+K = \lceil (1-\theta)n/2 \rceil .$$
 
-## Layout
+$M = m$ is forced from both sides: larger breaks the exactness of the rule on the
+products $f H_\alpha$, and smaller wastes coefficients already paid for.
 
-| file | contents |
+## Contents
+
+| | |
 |---|---|
-| `hermite_cv.py` | the spectral estimator: orthonormal Hermite basis, Gauss–Hermite rule, tensorised coefficients, antithetic and plain variants, exact variance decomposition |
-| `stratified.py` | the stratified estimator, its truncated-normal moments, and its figure |
-| `gaussian_targets.py` | test integrands with exact values, including the smoothness ladder |
-| `run_comparison.py` | budget sweeps, slope fitting, plots |
-| `chopin_benchmark.py` | the upstream test functions, both estimators, upstream protocol |
-| `pima_setup.py`, `integrands.py`, `run_pima.py` | the Pima marginal-likelihood experiment |
-| `make_thesis_figures.py` | the dissertation figures |
-| `results/` | the CSVs and figures behind the reported tables |
-
-The notebook `../reruns.ipynb` reproduces everything without importing these
-files; it inlines them so it can be run in a fresh environment.
+| `Spectral Code.ipynb` | every run below, in order |
+| `figs/` | the figures and CSVs the notebook writes |
 
 ## Reproducing the results
 
-**The smoothness ladder** — the experiment from which the convergence rate is
-measured. The family $f_p(z) = \sum_i (z_i - 0.3)_+^{\,p}$ has exactly $p$
-square-integrable derivatives, since the $p$-th is a bounded step and the
-$(p+1)$-th a Dirac mass, so varying $p$ varies the smoothness and nothing else.
+Open `Spectral Code.ipynb`, run the setup cells at the top, then any block
+independently.
 
-```bash
-python run_comparison.py --s 1 --family relu --nmin 400 --nmax 12000 \
-    --npts 8 --nreps 200 --theta 0.25 --m_max 3000 \
-    --methods hermite hermite_fm12 --outdir ladder_s1
-python run_comparison.py --s 2 --family relu --nmin 1000 --nmax 200000 \
-    --npts 8 --nreps 200 --theta 0.5 --m_max 400 \
-    --methods hermite --outdir ladder_s2
-```
+| Output | Call | Notes |
+|---|---|---|
+| Figure 3, Table 3 | ladder sweeps at $s=1$ and $s=2$, then `build_figures(...)` | writes `figs/fig_ladder.png` |
+| Figure 4 | same call | writes `figs/fig_slope_vs_r.png` |
+| Figure 2, Table 2 | `run_benchmark(...)` at $d=1,2,3$ | writes `chopin_bench/dick{1,2,3}D.png` |
+| Table 4 | head-to-head sweep at $s=1$ | both estimators on the same integrands |
+| Figure 5, Tables 6--7 | `run_pima(d=2, ...)` and `run_pima(d=4, ...)` | writes `pima_results/Pima{2,4}.png` |
 
-Adding `cgv1 cgv2 cgv4` to `--methods` runs the upstream vanishing estimator on
-the same integrands, which is the only setting in which the two exponents can be
-compared directly.
+The $s=2$ ladder and the $s=3$ benchmark are the long runs. Reduce `nreps` for a
+quick look.
 
-**The upstream benchmark** — their functions $ue^u$, $u_2e^{u_1u_2}$ and
-$u_2u_3^2e^{u_1u_2u_3}$, taken from `nonvanish_xp/dick*D.py`, attacked by both
-estimators through the probability integral transform $u = \Phi(z)$.
+## Test problems
 
-```bash
-python chopin_benchmark.py --d 1 --orders 1 2 4 6 --nreps 50
-python chopin_benchmark.py --d 2 --orders 1 2 4 6 --nreps 50
-python chopin_benchmark.py --d 3 --orders 1 2 4 6 --nreps 50
-```
+**Smoothness ladder.** $f_p(z) = \sum_i (z_i - c)_+^p$ with $c = 0.3$ and
+$p = 1,\dots,5$. Differentiating $p$ times leaves a step function and the
+$(p+1)$-th derivative is a Dirac mass, so $f_p$ has exactly $p$ square-integrable
+weak derivatives. Varying $p$ changes the smoothness and nothing else, which is
+what makes the increment per derivative interpretable. The kink sits at $0.3$
+rather than the origin because $z=0$ maps to $u=1/2$ under the probability integral
+transform, which is a cell boundary of the cubic stratification whenever $k$ is
+even, and a singularity on a cell boundary flatters the comparison method.
 
-**The Pima marginal likelihood** — Bayesian logistic regression on the Pima
-dataset, the problem of Section 5.2 of the paper.
+**Chopin--Gerber problems.** Their `dick1D`, `dick2D`, `dick3D` integrands, brought
+onto the Gaussian measure by $u = \Phi(z)$ coordinatewise. These are $C^\infty$, so
+no finite smoothness index exists and the experiment measures adaptivity rather
+than a rate.
 
-```bash
-cd .  # from spectral/
-python run_pima.py --d 2 --nreps 50 --orders 1 2 4 6
-python run_pima.py --d 4 --nreps 50 --orders 1 2 4
-```
+**Pima.** Marginal likelihood of a Bayesian logistic regression at $s=2$ and $s=4$.
+The Hessian is formed in closed form at the posterior mode rather than read off the
+optimiser's accumulated approximation, which at $s=4$ differ by factors between
+0.4 and 7.5 along the diagonal.
 
-**The stratified estimator's figure**
+## What the results show
 
-```bash
-python stratified.py
-```
+The estimator leads at $s=1$ and $s=2$ on every problem tested, reaching the double
+precision floor at budgets where the comparison method needs its highest order and
+roughly twice the evaluations. By $s=3$ it loses the lead. The tensor grid costs
+$m^s$ evaluations, so the truncation degree grows only as $n^{1/s}$, and at
+$n = 40{,}000$ with $s=4$ that leaves eleven nodes per axis — too few to exploit the
+smoothness the integrand has. A sparse grid construction is the direct extension.
 
-## Two departures from the upstream code
-
-Both concern the Pima experiment only, and both were necessary for the two
-estimators to be attacking the same integral.
-
-**The log-Jacobian sign in `vanish_xp/pima_common.py`.** That routine forms
-`lq = ljac - cst` and returns `exp(lp - lq - maxlp)`, so the log-Jacobian enters
-negatively, whereas Proposition 1 of the paper requires
-$f_{g,\psi}(u) = g(\psi_s(u)) \prod_i \psi_1'(u_i)$, that is positively; the
-`psi` routine does return $dz/du$. The additive constant also carries a factor
-$\tfrac12$ relative to $\log|\det C|$. As written the routine returns
-$1.08\times10^{-4}$ at $s=2$ and $1.46\times10^{-8}$ at $s=4$, against correct
-values of order $7.5\times10^{-2}$ and $2.2\times10^{-2}$. The published results
-are unaffected, since the relative variance they report is invariant to the scale
-of the integrand. `integrands.py` restores the sign and the constant, and offers
-the original as `variant='as_written'` for comparison.
-
-**The Laplace covariance.** `vanish_xp/prep_pima.py` takes $\Sigma$ from the
-optimiser's `hess_inv`, which is BFGS's accumulated approximation rather than the
-inverse Hessian; at $s=4$ the two differ by factors between $0.4$ and $7.5$ along
-the diagonal, which is enough to make any importance-weighted estimator built on
-it behave badly. `pima_setup.py` forms the Hessian in closed form,
-$\sum_i \sigma_i(1-\sigma_i)x_ix_i^\top + \sigma_{\text{prior}}^{-2}I$, and does
-not read `results/pima_mean_cov.pkl`.
-
-## Notes on the implementation
-
-Everything is written in the orthonormal basis
-$\hat h_\alpha(z) = \prod_i He_{\alpha_i}(z_i)/\sqrt{\alpha_i!}$, so that
-$\beta_\alpha = b_\alpha/\sqrt{\alpha!}$ and the variance identities lose their
-factorial bookkeeping. $He_n(z)$ overflows for moderate $n$; the normalised
-version does not.
-
-Two Gauss–Hermite pitfalls are handled in `hermite_cv.py`.
-`numpy.polynomial.hermite_e.hermegauss` overflows past $m \approx 150$. And the
-textbook Golub–Welsch weights $w_q = V_{0q}^2$ have no relative accuracy for the
-tiny outer weights, bottoming out near $10^{-60}$ where the true value is
-$10^{-350}$, which destroys any expression multiplying a weight by something
-exponentially large. Nodes are taken from the Jacobi eigenvalues and weights from
-the Christoffel formula $w_q = 1/\sum_{n<m}\hat h_n(x_q)^2$, evaluated in a scaled
-basis where every quantity is $O(1)$. This is accurate to $m \approx 4000$.
-
-The cost of `quad_coefficients` is an $m^s$ grid and an $(m,M)$ matrix, and of
-`eval_expansion` is $K M^s$; keep $m^s \lesssim 10^5$. In $s=1$ use a small
-`--theta` to keep $m$ within `--m_max`.
-
-`run_comparison.py` writes `rmse_s{s}.csv` and `slopes_s{s}.csv` into
-`--outdir`, so two runs at the same dimension into the same directory will
-overwrite one another. Use a distinct `--outdir` per run.
+On the finite-smoothness ladder the fitted slopes are steeper than the proved bound
+throughout, and their increments per derivative are close to $0.5$ at $s=1$ and
+$0.25$ at $s=2$, consistent with $n^{-1/2-r/2s}$, which is the proved rate with the
+$1/(6s)$ removed.
