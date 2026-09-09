@@ -78,7 +78,7 @@ goes from 1 to 2. Doubling the order of the local expansion buys no exponent.
 
 This is the cap of
 
-$$\mathrm{RMSE} = O\!\left(n^{-\frac12-\frac{1}{2s}}(\log n)^{-r/2}\right),$$
+$$\mathrm{RMSE} = O\left(n^{-\frac12-\frac{1}{2s}}(\log n)^{-r/2}\right),$$
 
 in which $r$ appears only inside the logarithm. The cause is that the extreme
 quantiles satisfy $\Phi^{-1}(1/k) \sim -\sqrt{2\log k}$, so the displacement in an
