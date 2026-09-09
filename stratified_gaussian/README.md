@@ -50,7 +50,7 @@ $n = 2k^s$, one antithetic pair per stratum.
 | | |
 |---|---|
 | `Stratified.ipynb` | the estimator and the run that produces Figure 1 and Table 1 |
-| `figs/` | `fig_strat.png` and `fig_strat.pdf` |
+| `figs` | `fig_strat.png`|
 
 ## Reproducing Figure 1 and Table 1
 
