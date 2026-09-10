@@ -60,8 +60,7 @@ Feel free to email me: nicolas.chopin@ensae.fr
 
 ## Additions in this fork ##
 
-Estimators for Gaussian integrals $\int_{\mathbb{R}^s} f(x)\,\phi_{\mu,\Sigma}(x)\,dx$,
-developed for an MSc dissertation, together with the code that compares them
+Estimators for Gaussian integrals $\int_{\mathbb{R}^s} f(x)\,\phi_{\mu,\Sigma}(x)\,dx$, together with the code that compares them
 against the upstream estimators on the upstream test problems.
 
 | | |
